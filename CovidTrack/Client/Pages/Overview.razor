@@ -1,0 +1,98 @@
+﻿@page "/overview"
+@inject HttpClient http;
+
+<div class="row">
+    <h3 style="color: #6135ff; font-weight:bold">Covid-19</h3> <h3>&nbsp;Global Trend</h3>
+</div>
+
+
+@if (All == null)
+{
+    <h3 class="mat-subtitle1">Loading...</h3>
+    <MatProgressBar Indeterminate="true"></MatProgressBar>
+}
+else
+{
+    <div class="row" style="margin-left:30px;">
+        <MatAutocompleteList Items="@Countries" TItem="Country" Label="Choose the Country" CustomStringSelector="@(i => i.country)" @bind-Value="@value" Style="max-height:100%;">
+            <ItemTemplate>
+                <div style="display: flex; flex-direction: row; width: 100%;">
+                    <div style="flex: 1;">@context.country</div>
+                    <div>
+                        <img src="@context.countryInfo.flag" style="height:30px;width:30px" />
+                    </div>
+                </div>
+            </ItemTemplate>
+        </MatAutocompleteList>
+        @if (value != null)
+        {
+            <img src="@value.countryInfo.flag" style="height:57px;width:57px" />
+        }
+    </div>
+
+    <div class="mat-layout-grid">
+        <div class="mat-layout-grid-inner">
+            <div class="mat-layout-grid-cell mat-layout-grid-cell-span-3">
+                <div class="mat-elevation-z2 text-center" style="padding:15px;">
+                    <span style="font-weight: bold;color: #292059;font-size:15px;">Cases Confirmed</span>
+                    <br />
+                    <span style="color:red;font-weight:bold;">@All.cases</span>
+                </div>
+            </div>
+            <div class="mat-layout-grid-cell mat-layout-grid-cell-span-3">
+
+                <div class="mat-elevation-z2 text-center" style="padding:15px;">
+                    <span style="font-weight:bold;color: #292059;font-size:15px;">Today Cases</span>
+                    <br />
+                    <span style="color:orange; font-weight:bold;">@All.todayCases</span>
+                </div>
+
+            </div>
+            <div class="mat-layout-grid-cell mat-layout-grid-cell-span-3">
+
+                <div class="mat-elevation-z2 text-center" style="padding:15px;">
+                    <span style="font-weight:bold;color: #292059;font-size:15px;">Recovered</span>
+                    <br />
+                    <span style="color:limegreen; font-weight:bold;">@All.recovered</span>
+                </div>
+
+            </div>
+            <div class="mat-layout-grid-cell mat-layout-grid-cell-span-3">
+
+                <div class="mat-elevation-z2 text-center" style="padding:15px;">
+                    <span style="font-weight:bold;color: #292059;font-size:15px;">Death</span>
+                    <br />
+                    <span style="color:royalblue; font-weight:bold;">@All.deaths</span>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+}
+
+@code {
+    GlobalTrend All;
+    IList<Country> Countries;
+
+    Country value = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        //await LoadAll();
+        //await LoadCountries();
+
+        await Task.WhenAll(LoadAll(), LoadCountries());
+    }
+
+    async Task LoadAll()
+    {
+        All = await http.GetFromJsonAsync<GlobalTrend>("api/global");
+    }
+
+    async Task LoadCountries()
+    {
+        Countries = await http.GetFromJsonAsync<List<Country>>("api/country");
+    }
+
+}
